@@ -10,7 +10,7 @@ on:
     branches: [ master ]
 
 jobs:
-  build:
+  build-windows:
 
     runs-on: windows-latest
 
@@ -27,7 +27,7 @@ jobs:
     - run: npm ci
     - run: npm run build --if-present
 
-  build:
+  build-ubuntu:
 
     runs-on: ubuntu-latest
 
