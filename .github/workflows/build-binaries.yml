@@ -60,3 +60,10 @@ jobs:
         node-version: ${{ matrix.node-version }}
     - run: npm ci
     - run: npm run build --if-present
+
+  test:
+    needs: [build-windows, build-ubuntu, build-macos]
+
+    steps:
+    - name: After all build, do something else
+    - run: echo Hello!
