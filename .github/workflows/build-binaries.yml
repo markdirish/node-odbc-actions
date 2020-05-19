@@ -62,6 +62,9 @@ jobs:
     - run: npm run build --if-present
 
   test:
+
+    runs-on: ubunutu-latest
+
     needs: [build-windows, build-ubuntu, build-macos]
 
     steps:
