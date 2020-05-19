@@ -63,7 +63,7 @@ jobs:
 
   test:
 
-    runs-on: ubunutu-latest
+    runs-on: ubuntu-latest
 
     needs: [build-windows, build-ubuntu, build-macos]
 
