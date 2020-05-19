@@ -66,4 +66,4 @@ jobs:
 
     steps:
     - name: After all build, do something else
-    - run: echo Hello!
+      run: echo Hello!
