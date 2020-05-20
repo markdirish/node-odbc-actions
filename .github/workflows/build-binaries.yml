@@ -26,7 +26,7 @@ jobs:
         node-version: ${{ matrix.node-version }}
     - run: npm ci --production
     - name: Package Binaries
-      uses: actions/upload-artifact@v1
+      uses: actions/upload-artifact@v2
       with:
         name: binary
         path: /build/stage/*.tar.gz
