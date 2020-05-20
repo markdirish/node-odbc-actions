@@ -27,9 +27,9 @@ jobs:
     - run: npm ci --production
     - name: Package Binaries
       uses: actions/upload-artifact@v1
-        with:
-          name: binary
-          path: /build/stage/*.tar.gz
+      with:
+        name: binary
+        path: /build/stage/*.tar.gz
 
   build-ubuntu:
 
