@@ -25,7 +25,8 @@ jobs:
       with:
         node-version: ${{ matrix.node-version }}
     - run: npm ci --production
-    - run: pwd && ls -la
+    - run: pwd
+    - run: ls -la
     - name: Package Binaries
       uses: actions/upload-artifact@v2
       with:
