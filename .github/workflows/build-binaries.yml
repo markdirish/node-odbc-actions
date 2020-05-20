@@ -25,9 +25,9 @@ jobs:
       with:
         node-version: ${{ matrix.node-version }}
     - run: npm ci --production
-    - run: pwd
-    - run: ls -la
-    - name: Package Binaries
+    - name: Package Binary
+      run: ./node_modules/.bin/node-pre-gyp package
+    - name: Upload Artifact
       uses: actions/upload-artifact@v2
       with:
         name: binary
