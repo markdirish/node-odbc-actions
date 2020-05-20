@@ -29,7 +29,7 @@ jobs:
       uses: actions/upload-artifact@v2
       with:
         name: binary
-        path: /build/stage/*.tar.gz
+        path: build/stage/*.tar.gz
 
   build-ubuntu:
 
