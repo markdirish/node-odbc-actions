@@ -52,7 +52,7 @@
   },
   "binary": {
     "module_name": "odbc",
-    "module_path": "./lib/odbc/",
-    "host": "https://your_module.s3-us-west-1.amazonaws.com"
+    "module_path": "./build/Release/",
+    "host": "https://github.com/markdirish/node-odbc-actions/releases/download/v2.3.0"
   }
 }
