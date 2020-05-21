@@ -85,9 +85,9 @@ jobs:
 
     steps:
     - name: Get package.json version
-      run: "PACKAGE_VERSION=$(cat package.json | grep version | head -1 | awk -F: '{ print $2 }' | sed 's/[",]//g' | tr -d '[[:space:]]')"
-      # run: echo ::set-output name=current-version::$PACKAGE_VERSION
-      # run: echo $PACKAGE_VERSION
+    # run: "PACKAGE_VERSION=$(cat package.json | grep version | head -1 | awk -F: '{ print $2 }' | sed 's/[",]//g' | tr -d '[[:space:]]')"
+    # run: echo ::set-output name=current-version::$PACKAGE_VERSION
+    # run: echo $PACKAGE_VERSION
 
     #   id: create_release
     #   uses: actions/create-release@v1
