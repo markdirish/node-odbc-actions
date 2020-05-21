@@ -99,6 +99,8 @@ jobs:
           | head -1 \
           | awk -F:'{ print $2 }' \
           | sed 's/[",]//g')
+
+    - name: print package version
       run: echo $PACKAGE_VERSION
 
     - name: Create Release 
