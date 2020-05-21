@@ -5,7 +5,7 @@ name: Build Binaries
 
 on:
   push:
-    #test
+    #test1
     tags: ["v*"]
 
 jobs:
