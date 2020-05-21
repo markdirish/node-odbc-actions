@@ -53,7 +53,7 @@
   "binary": {
     "module_name": "odbc",
     "module_path": "./build/Release/",
-    "host": "https://github.com/markdirish/node-odbc/releases/download",
-    "remote_path": "/v{version}"
+    "host": "https://github.com",
+    "remote_path": "/markdirish/node-odbc/releases/download/v{version}"
   }
 }
