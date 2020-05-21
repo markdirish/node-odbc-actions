@@ -28,7 +28,7 @@ jobs:
     - name: Upload Artifact
       uses: actions/upload-artifact@v2
       with:
-        name: binary
+        name: binaries
         path: build/stage/*.tar.gz
 
   build-ubuntu:
@@ -51,7 +51,7 @@ jobs:
     - name: Upload Artifact
       uses: actions/upload-artifact@v2
       with:
-        name: binary
+        name: binaries
         path: build/stage/*.tar.gz
 
   build-macos:
@@ -74,7 +74,7 @@ jobs:
     - name: Upload Artifact
       uses: actions/upload-artifact@v2
       with:
-        name: binary
+        name: binaries
         path: build/stage/*.tar.gz
 
   create-release:
@@ -84,28 +84,36 @@ jobs:
     needs: [build-windows, build-ubuntu, build-macos]
 
     steps:
-    - name: Get package.json version
-      run: echo "Hello Duddits!"
-    # run: "PACKAGE_VERSION=$(cat package.json | grep version | head -1 | awk -F: '{ print $2 }' | sed 's/[",]//g' | tr -d '[[:space:]]')"
-    # run: echo ::set-output name=current-version::$PACKAGE_VERSION
-    # run: echo $PACKAGE_VERSION
 
-    #   id: create_release
-    #   uses: actions/create-release@v1
-    #   env:
-    #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-    #   with:
-    #     tag_name: ${{ github.ref }}
-    #     release_name: Release ${{ github.ref }}
-    #     draft: false
-    #     prerelease: false
-    # - name: Upload Release Asset
-    #   id: upload-release-asset 
-    #   uses: actions/upload-release-asset@v1
-    #   env:
-    #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-    #   with:
-    #     upload_url: ${{ steps.create_release.outputs.upload_url }} # This pulls from the CREATE RELEASE step above, referencing it's ID to get its outputs object, which include a `upload_url`. See this blog post for more info: https://jasonet.co/posts/new-features-of-github-actions/#passing-data-to-future-steps 
-    #     asset_path: ./my-artifact.zip
-    #     asset_name: my-artifact.zip
-    #     asset_content_type: application/zip
+    - uses: actions/download-artifact@v2
+      with:
+        name: binaries
+
+    - name: Display structure of downloaded files
+      run: ls -R
+
+    - name: Get package.json version
+      id: package-version
+      uses: martinbeentjes/npm-get-version-action@master
+
+    - name: Create Release 
+      id: create_release
+      uses: actions/create-release@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        tag_name: v${{ steps.package-version.outputs.current-version}}
+        release_name: ${{ steps.package-version.outputs.current-version}}
+        draft: false
+        prerelease: false
+
+    - name: Upload Release Assets
+      id: upload-release-asset 
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: ./my-artifact.zip
+        asset_name: my-artifact.zip
+        asset_content_type: application/zip
