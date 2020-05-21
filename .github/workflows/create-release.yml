@@ -85,23 +85,21 @@ jobs:
 
     steps:
 
+    - uses: actions/checkout@v2
+
+    - name: get-npm-version
+      id: package-version
+      uses: martinbeentjes/npm-get-version-action@master
+
+    - name: print package version
+      run: echo ${{ steps.package-version.outputs.current-version}}
+
     - uses: actions/download-artifact@v2
       with:
         name: binaries
 
     - name: Display structure of downloaded files
       run: ls -R
-
-    - name: Get package.json version
-      id: package-version
-      run: PACKAGE_VERSION=$(cat package.json \
-          | grep version \
-          | head -1 \
-          | awk -F:'{ print $2 }' \
-          | sed 's/[",]//g')
-
-    - name: print package version
-      run: echo $PACKAGE_VERSION
 
     - name: Create Release 
       id: create_release
