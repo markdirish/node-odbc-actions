@@ -81,7 +81,7 @@ jobs:
 
     runs-on: ubuntu-latest
 
-    needs: [build-windows, build-ubuntu, build-macos]
+    needs: [build-ubuntu, build-macos]
 
     steps:
 
