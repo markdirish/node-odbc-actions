@@ -18,7 +18,8 @@ jobs:
       with:
         node-version: ${{ matrix.node-version }}
     - run: npm ci --production
-    - run: ls
+    - run: ls ./lib/bindings/
+    - run: ls ./lib/bindings/napi-v5/
     - run: ./node_modules/.bin/node-pre-gyp rebuild
     - name: Package Binary
       run: ./node_modules/.bin/node-pre-gyp package
