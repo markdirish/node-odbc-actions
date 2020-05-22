@@ -39,6 +39,7 @@ jobs:
 
     steps:
     - run: ls -R /usr/lib/
+    - run: ls -R /usr/lib64/
     - uses: actions/checkout@v2
     - name: Use Node.js ${{ matrix.node-version }}
       uses: actions/setup-node@v1
