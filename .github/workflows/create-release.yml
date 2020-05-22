@@ -9,7 +9,7 @@ jobs:
 
     strategy:
       matrix:
-        node-version: [10.x, 12.x]
+        node-version: [12.x]
 
     steps:
     - uses: actions/checkout@v2
@@ -32,7 +32,7 @@ jobs:
 
     strategy:
       matrix:
-        node-version: [10.x, 12.x]
+        node-version: [12.x]
 
     steps:
     - uses: actions/checkout@v2
@@ -55,7 +55,7 @@ jobs:
 
     strategy:
       matrix:
-        node-version: [10.x, 12.x]
+        node-version: [12.x]
 
     steps:
     - uses: actions/checkout@v2
@@ -103,62 +103,32 @@ jobs:
 
     # Upload the various binaries
 
-    - name: Upload Darwin v64
+    - name: Upload odbc-v${{ steps.package-version.outputs.current-version }}-darwin-x64-napi-v3.tar.gz
       uses: actions/upload-release-asset@v1
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: ./odbc-v${{ steps.package-version.outputs.current-version }}-node-v64-darwin-x64.tar.gz
-        asset_name: odbc-v${{ steps.package-version.outputs.current-version }}-node-v64-darwin-x64.tar.gz
+        asset_path: ./odbc-v${{ steps.package-version.outputs.current-version }}-darwin-x64-napi-v3.tar.gz
+        asset_name: odbc-v${{ steps.package-version.outputs.current-version }}-darwin-x64-napi-v3.tar.gz
         asset_content_type: application/gzip
 
-    - name: Upload Darwin v72
+    - name: Upload odbc-v${{ steps.package-version.outputs.current-version }}-win32-x64-napi-v3.tar.gz
       uses: actions/upload-release-asset@v1
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: ./odbc-v${{ steps.package-version.outputs.current-version }}-node-v72-darwin-x64.tar.gz
-        asset_name: odbc-v${{ steps.package-version.outputs.current-version }}-node-v72-darwin-x64.tar.gz
+        asset_path: ./odbc-v${{ steps.package-version.outputs.current-version }}-win32-x64-napi-v3.tar.gz
+        asset_name: odbc-v${{ steps.package-version.outputs.current-version }}-win32-x64-napi-v3.tar.gz
         asset_content_type: application/gzip
 
-    - name: Upload Win32 v64
+    - name: Upload odbc-v${{ steps.package-version.outputs.current-version }}-linux-x64-napi-v3.tar.gz
       uses: actions/upload-release-asset@v1
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: ./odbc-v${{ steps.package-version.outputs.current-version }}-node-v64-win32-x64.tar.gz
-        asset_name: odbc-v${{ steps.package-version.outputs.current-version }}-node-v64-win32-x64.tar.gz
-        asset_content_type: application/gzip
-
-    - name: Upload Win32 v72
-      uses: actions/upload-release-asset@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: ./odbc-v${{ steps.package-version.outputs.current-version }}-node-v72-win32-x64.tar.gz
-        asset_name: odbc-v${{ steps.package-version.outputs.current-version }}-node-v72-win32-x64.tar.gz
-        asset_content_type: application/gzip
-
-    - name: Upload Linux v64
-      uses: actions/upload-release-asset@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: ./odbc-v${{ steps.package-version.outputs.current-version }}-node-v64-linux-x64.tar.gz
-        asset_name: odbc-v${{ steps.package-version.outputs.current-version }}-node-v64-linux-x64.tar.gz
-        asset_content_type: application/gzip
-
-    - name: Upload Linux v72
-      uses: actions/upload-release-asset@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: ./odbc-v${{ steps.package-version.outputs.current-version }}-node-v72-linux-x64.tar.gz
-        asset_name: odbc-v${{ steps.package-version.outputs.current-version }}-node-v72-linux-x64.tar.gz
+        asset_path: ./odbc-v${{ steps.package-version.outputs.current-version }}-linux-x64-napi-v3.tar.gz
+        asset_name: odbc-v${{ steps.package-version.outputs.current-version }}-linux-x64-napi-v3.tar.gz
         asset_content_type: application/gzip
