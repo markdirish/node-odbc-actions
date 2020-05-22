@@ -3,31 +3,31 @@ name: Create Release
 on: push
 
 jobs:
-  # build-windows:
+  build-windows:
 
-  #   runs-on: windows-latest
+    runs-on: windows-latest
 
-  #   strategy:
-  #     matrix:
-  #       node-version: [12.x]
+    strategy:
+      matrix:
+        node-version: [12.x]
 
-  #   steps:
-  #   - uses: actions/checkout@v2
-  #   - name: Use Node.js ${{ matrix.node-version }}
-  #     uses: actions/setup-node@v1
-  #     with:
-  #       node-version: ${{ matrix.node-version }}
-  #   - run: npm ci --production
-  #   - run: ls ./lib/bindings/
-  #   - run: ls ./lib/bindings/napi-v5/
-  #   - run: ./node_modules/.bin/node-pre-gyp build
-  #   - name: Package Binary
-  #     run: ./node_modules/.bin/node-pre-gyp package
-  #   - name: Upload Artifact
-  #     uses: actions/upload-artifact@v2
-  #     with:
-  #       name: binaries
-  #       path: build/stage/*.tar.gz
+    steps:
+    - uses: actions/checkout@v2
+    - name: Use Node.js ${{ matrix.node-version }}
+      uses: actions/setup-node@v1
+      with:
+        node-version: ${{ matrix.node-version }}
+    - run: npm ci --production
+    - run: ls ./lib/bindings/
+    - run: ls ./lib/bindings/napi-v5/
+    - run: ./node_modules/.bin/node-pre-gyp build
+    - name: Package Binary
+      run: ./node_modules/.bin/node-pre-gyp package
+    - name: Upload Artifact
+      uses: actions/upload-artifact@v2
+      with:
+        name: binaries
+        path: build/stage/*.tar.gz
 
   build-ubuntu:
 
@@ -38,6 +38,7 @@ jobs:
         node-version: [12.x]
 
     steps:
+    - run: ls /lib64/
     - uses: actions/checkout@v2
     - name: Use Node.js ${{ matrix.node-version }}
       uses: actions/setup-node@v1
