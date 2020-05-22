@@ -20,7 +20,7 @@ jobs:
     - run: npm ci --production
     - run: ls ./lib/bindings/
     - run: ls ./lib/bindings/napi-v5/
-    - run: ./node_modules/.bin/node-pre-gyp rebuild
+    - run: ./node_modules/.bin/node-pre-gyp build
     - name: Package Binary
       run: ./node_modules/.bin/node-pre-gyp package
     - name: Upload Artifact
