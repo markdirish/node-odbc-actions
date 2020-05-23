@@ -17,6 +17,7 @@ jobs:
       uses: actions/setup-node@v1
       with:
         node-version: ${{ matrix.node-version }}
+    - run: npm install -g node-gyp
     - run: npm ci --production
     - run: ./node_modules/.bin/node-pre-gyp build
     - name: Package Binary
