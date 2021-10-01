@@ -31,7 +31,7 @@ Three main steps must be done before `node-odbc` can interact with your database
   * **Ubuntu/Debian**: `sudo apt-get install unixodbc unixodbc-dev`
   * **RedHat/CentOS**: `sudo yum install unixODBC unixODBC-devel`
   * **OSX**:
-    * **macports.<span></span>org:** `sudo port unixODBC`
+    * **macports.<span></span>org:** `sudo port install unixODBC`
     * **using brew:** `brew install unixODBC`
   * **IBM i:** `yum install unixODBC unixODBC-devel` (requires [yum](http://ibm.biz/ibmi-rpms))
 
