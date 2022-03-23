@@ -2,7 +2,10 @@ declare namespace odbc {
 
   class ColumnDefinition {
     name: string;
-    datayType: number;
+    dataType: number;
+    columnSize: number;
+    decimalDigits: number;
+    nullable: boolean;
   }
 
   class Result<T> extends Array<T> {
@@ -33,7 +36,7 @@ declare namespace odbc {
 
     bind(parameters: Array<number|string>, callback: (error: NodeOdbcError) => undefined): undefined;
 
-    execute(callback: (error: NodeOdbcError, result: Result<unknown>) => undefined): undefined;
+    execute<T>(callback: (error: NodeOdbcError, result: Result<T>) => undefined): undefined;
 
     close(callback: (error: NodeOdbcError) => undefined): undefined;
 
@@ -45,9 +48,31 @@ declare namespace odbc {
   
     bind(parameters: Array<number|string>): Promise<void>;
   
-    execute(): Promise<Result<unknown>>;
+    execute<T>(): Promise<Result<T>>;
   
     close(): Promise<void>;
+  }
+
+  interface ConnectionParameters {
+    connectionString: string;
+    connectionTimeout?: number;
+    loginTimeout?: number;
+  }
+  interface PoolParameters {
+    connectionString: string;
+    connectionTimeout?: number;
+    loginTimeout?: number;
+    initialSize?: number;
+    incrementSize?: number;
+    maxSize?: number;
+    shrink?: boolean;
+  }
+
+  interface QueryOptions {
+    cursor?: boolean|string;
+    fetchSize?: number;
+    timeout?: number;
+    initialBufferSize?: number; 
   }
 
   class Connection {
@@ -55,8 +80,10 @@ declare namespace odbc {
     ////////////////////////////////////////////////////////////////////////////
     //   Callbacks   ///////////////////////////////////////////////////////////
     ////////////////////////////////////////////////////////////////////////////
-    query(sql: string, callback: (error: NodeOdbcError, result: Result<unknown>) => undefined): undefined;
-    query(sql: string, parameters: Array<number|string>, callback: (error: NodeOdbcError, result: Result<unknown>) => undefined): undefined;
+    query<T>(sql: string, callback: (error: NodeOdbcError, result: Result<T>) => undefined): undefined;
+    query<T>(sql: string, parameters: Array<number|string>, options: QueryOptions, callback: (error: NodeOdbcError, result: Result<T>) => undefined): undefined;
+    query<T>(sql: string, options: QueryOptions, callback: (error: NodeOdbcError, result: Result<T>) => undefined): undefined;
+    query<T>(sql: string, parameters: Array<number|string>, options: QueryOptions, callback: (error: NodeOdbcError, result: Result<T>) => undefined): undefined;
 
     callProcedure(catalog: string, schema: string, name: string, callback: (error: NodeOdbcError, result: Result<unknown>) => undefined): undefined;
     callProcedure(catalog: string, schema: string, name: string, parameters: Array<number|string>, callback: (error: NodeOdbcError, result: Result<unknown>) => undefined): undefined;
@@ -80,8 +107,10 @@ declare namespace odbc {
     ////////////////////////////////////////////////////////////////////////////
     //   Promises   ////////////////////////////////////////////////////////////
     ////////////////////////////////////////////////////////////////////////////
-
-    query(sql: string, parameters?: Array<number|string>): Promise<Result<unknown>>;
+    query<T>(sql: string): Promise<Result<T>>;
+    query<T>(sql: string, parameters: Array<number|string>): Promise<Result<T>>;
+    query<T>(sql: string, options: QueryOptions): Promise<Result<T>>;
+    query<T>(sql: string, parameters: Array<number|string>, options: QueryOptions): Promise<Result<T>>;
 
     callProcedure(catalog: string, schema: string, name: string, parameters?: Array<number|string>): Promise<Result<unknown>>;
 
@@ -109,8 +138,10 @@ declare namespace odbc {
     ////////////////////////////////////////////////////////////////////////////
     connect(callback: (error: NodeOdbcError, connection: Connection) => undefined): undefined;
 
-    query(sql: string, callback: (error: NodeOdbcError, result: Result<unknown>) => undefined): undefined;
-    query(sql: string, parameters: Array<number|string>, callback: (error: NodeOdbcError, result: Array<any>) => undefined): undefined;
+    query<T>(sql: string, callback: (error: NodeOdbcError, result: Result<T>) => undefined): undefined;
+    query<T>(sql: string, parameters: Array<number|string>, options: QueryOptions, callback: (error: NodeOdbcError, result: Result<T>) => undefined): undefined;
+    query<T>(sql: string, options: QueryOptions, callback: (error: NodeOdbcError, result: Result<T>) => undefined): undefined;
+    query<T>(sql: string, parameters: Array<number|string>, options: QueryOptions, callback: (error: NodeOdbcError, result: Result<T>) => undefined): undefined;
 
     close(callback: (error: NodeOdbcError) => undefined): undefined;
 
@@ -120,23 +151,26 @@ declare namespace odbc {
     ////////////////////////////////////////////////////////////////////////////
     connect(): Promise<Connection>;
 
-    query(sql: string, parameters?: Array<number|string>): Promise<Result<unknown>>;
+    query<T>(sql: string): Promise<Result<T>>;
+    query<T>(sql: string, parameters: Array<number|string>): Promise<Result<T>>;
+    query<T>(sql: string, options: QueryOptions): Promise<Result<T>>;
+    query<T>(sql: string, parameters: Array<number|string>, options: QueryOptions): Promise<Result<T>>;
 
     close(): Promise<void>;
   }
 
   function connect(connectionString: string, callback: (error: NodeOdbcError, connection: Connection) => undefined): undefined;
-  function connect(connectionObject: object, callback: (error: NodeOdbcError, connection: Connection) => undefined): undefined;
+  function connect(connectionObject: ConnectionParameters, callback: (error: NodeOdbcError, connection: Connection) => undefined): undefined;
 
   function connect(connectionString: string): Promise<Connection>;
-  function connect(connectionObject: object): Promise<Connection>;
+  function connect(connectionObject: ConnectionParameters): Promise<Connection>;
 
 
   function pool(connectionString: string, callback: (error: NodeOdbcError, pool: Pool) => undefined): undefined;
-  function pool(connectionObject: object, callback: (error: NodeOdbcError, pool: Pool) => undefined): undefined;
+  function pool(connectionObject: PoolParameters, callback: (error: NodeOdbcError, pool: Pool) => undefined): undefined;
 
   function pool(connectionString: string): Promise<Pool>;
-  function pool(connectionObject: object): Promise<Pool>;
+  function pool(connectionObject: PoolParameters): Promise<Pool>;
 }
 
 export = odbc;

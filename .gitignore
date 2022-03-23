@@ -2,8 +2,8 @@ a.out
 node_modules
 deps
 .idea
-core
-.env
+core*
+*.env
 .vscode
 build*
 lib/bindings

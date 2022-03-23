@@ -1,6 +1,94 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [2.4.2] - 2022-02-07
+### Added
+- `binding.gyp` build instructoins for MacOS 
+- `Statement`'s `.execute` function can now return a `Cursor` when the correct queryOption is passed
+
+### Fixed
+- `Statement` and `Cursor` should now better handle freeing memory
+- `Connection`'s `.callProcedure` should now work on Windows with `UNICODE` defined
+- Fixed up TypeScript definitions
+
+
+## [2.4.1] - 2021-10-19
+### Added
+- Simple binding path allows driver's that don't implement block fetch and column-wise binding to still be able to fetch results
+- Allow pool.query() to use query options
+
+### Fixed
+- Update timeout definitions in README.md
+- Fixed multiple memory leaks
+- Fixed multiple segfaults
+
+
+## [2.4.0] - 2021-07-06
+### Added
+- NEW Cursor class that is returned when new `cursor` query option is set to `true`. Cursor allows users to fetch partial result sets through calling `fetch`
+- NEW `timeout` query property allows users to define the number of seconds to wait for execution before returning to the application
+- NEW `initialBufferSize` query property property allows users to define the size of a buffer for SQL_LONG data types before resizing
+- Tests for multiple DBMSs added
+- Support for FreeBSD build
+
+### Fixed
+- Connection generation in pools is now more efficient and doesn't block queries
+- Retrieving binary data 
+- Improved TypeScript definitions
+- BIGINT fields are now bound by default correctly
+- Fixed multiple memory leaks
+- Fixed multiple uncaught errors
+- Dozens of minor fixes (see GitHub issues)
+
+### Changed
+- SQL_LONG* fields now use SQLGetData ODBC function, greatly increasing performance
+- Connection options can now be passed through to pool connections
+- Debugging no longer done through `DEBUG` define, but through existing connection manager facilities
+- Updated dependencies
+
+## [2.3.6] - 2021-02-19
+- Emergency version to fix a push made to `npm` in error.
+
+## [2.3.5] - 2020-09-14
+### Fixed
+- Fixed multiple connections being created after `pool.query()` is called.
+
+## [2.3.4] - 2020-08-09
+### Fixed
+- Fixed bug when UNICODE is defined where statement in result object and column name properties wouldn't encode correctly
+- Update package-lock.json with vulnerability fixes
+
+## [2.3.3] - 2020-07-31
+### Fixed
+- Fixed bug when UNICODE is defined where error message, error state, and column names wouldn't encode correctly
+
+## [2.3.2] - 2020-07-28
+### Fixed
+- Fixed bug with REAL, DECIMAL, and NUMERIC fields ocassionaly returning incorrect results
+
+### Changed 
+- Windows binaries are now built with `UNICODE` defined by default (like in 1.x)
+
+### Added
+- `columns` array on result set now includes `columnSize`, `decimalDigits`, and `nullable` data from `SQLDescribeCol`
+
+## [2.3.1] - 2020-07-24
+### Fixed
+- Fixed bug with `callProcedure` on big-endian systems
+
+## [2.3.0] - 2020-05-21
+### Added
+- `node-pre-gyp` added to dependencies to download pre-built binaries
+- TypeScript definitions added for all functions and objects
+
+### Changed
+- Refactored how column values are bound (now bound to correct C type)
+
+### Fixed
+- Promises no longer overwrite `odbcErrors` object on Errors
+- Parameters can now correctly be classified as integers or doubles
+- Multi-byte UTF-8 strings are now returned correctly
+
 ## [2.2.2] - 2019-10-27
 ### Fixed
 - Fixed SQL_DECIMAL, SQL_REAL, and SQL_NUMERIC losing precision

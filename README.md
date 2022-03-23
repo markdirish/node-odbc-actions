@@ -1,10 +1,12 @@
-node-odbc
----------
+# odbc
+
 
 An asynchronous interface for Node.js to unixODBC and its supported drivers.
 
-requirements
-------------
+---
+
+## Requirements
+
 
 * unixODBC binaries and development libraries for module compilation
   * on Ubuntu/Debian `sudo apt-get install unixodbc unixodbc-dev`
@@ -12,14 +14,21 @@ requirements
   * on OSX
     * using macports.org `sudo port unixODBC`
     * using brew `brew install unixODBC`
+  * on FreeBSD from ports `cd /usr/ports/databases/unixODBC; make install`
   * on IBM i `yum install unixODBC unixODBC-devel` (requires [yum](http://ibm.biz/ibmi-rpms))
-* odbc drivers for target database
+* ODBC drivers for target database
 * properly configured odbc.ini and odbcinst.ini.
 
-install
--------
+---
 
-`node-odbc` is an ODBC database interface for Node.js. It allows connecting to any database management system if the system has been correctly configured, including installing of unixODBC and unixODBC-devel packages, installing an ODBC driver for your desired database, and configuring your odbc.ini and odbcinst.ini files. By using an ODBC, and it makes remote development a breeze through the use of ODBC data sources, and switching between DBMS systems is as easy as modifying your queries, as all your code can stay the same.
+## Node.js Version Support
+
+This package is a native addon, built with C++ code using `node-addon-api`, a C++ wrapper for [N-API](https://nodejs.org/api/n-api.html). `node-addon-api` only supports versions of Node.js that are in LTS or newer. [A list of supported versions can be found on the Node.js website](https://nodejs.org/en/about/releases/). Current versions supported include:
+
+* Node.js 12
+* Node.js 14
+* Node.js 15
+* Node.js 16
 
 ---
 
@@ -33,6 +42,7 @@ Three main steps must be done before `node-odbc` can interact with your database
   * **OSX**:
     * **macports.<span></span>org:** `sudo port unixODBC`
     * **using brew:** `brew install unixODBC`
+  * **FreeBSD** from ports: `cd /usr/ports/databases/unixODBC; make install`
   * **IBM i:** `yum install unixODBC unixODBC-devel` (requires [yum](http://ibm.biz/ibmi-rpms))
 
 * **Install ODBC drivers for target database:** Most database management system providers offer ODBC drivers for their product. See the website of your DBMS for more information.
@@ -44,6 +54,27 @@ When all these steps have been completed, install `node-odbc` into your Node.js 
 ```bash
 npm install odbc
 ```
+---
+
+## Debugging
+
+This package used to contain its own method of tracing ODBC calls, which was enabled by recompiling the package with `DEBUG` defined. Because this information was almost wholly redundant with existing methods of tracing available through ODBC driver managers, it was removed in v2.4.0.
+
+Instead, tracing should be enabled through your driver manager, and that information can be analyzed and included with the description of issues encountered.
+
+* **unixODBC (Linux, MacOS, IBM i):**
+
+    In your `odbcinst.ini` file, add the following entry:
+    ```
+    [ODBC]
+    Trace=yes
+    TraceFile=/tmp/odbc.log
+    ```
+    Debug information will be appended to the trace file.
+
+* **ODBC Data Source Administrator (Windows):**
+
+    Open up ODBC Data Source Administrator and select the "Tracing" tab. Enter the location where you want the log file to go in **"Log File Path"**, then click **"Start Tracing Now"**.
 ---
 
 ## Drivers
@@ -90,6 +121,10 @@ npm install odbc
     * [.bind()](#bindparameters-callback)
     * [.execute()](#executecallback)
     * [.close()](#closecallback-2)
+* [Cursor](#Cursor)
+    * [.fetch()](#fetchcallback)
+    * [.noData()](#nodata)
+    * [.close()](#closecallback-3)
 
 ### **Callbacks _or_ Promises**
 
@@ -168,9 +203,9 @@ In order to get a connection, you must use the `.connect` function exported from
 #### Parameters:
 * **connectionString**: The connection string to connect to the database, usually by naming a DSN. Can also be a configuration object with the following properties:
     * `connectionString` **REQUIRED**: The connection string to connect to the database
-    * `connectionTimeout`: How long before an idle connection will close, in seconds
-    * `loginTimeout`: How long before the connection process will attempt to connect before timing out, in seconds.
-* **{OPTIONAL} callback**: The function called when `.connect` has finished connecting. If no callback function is given, `.connect` will return a native JavaScript `Promise`. Callback signature is:
+    * `connectionTimeout`: The number of seconds to wait for a request on the connection to complete before returning to the application
+    * `loginTimeout`: The number of seconds to wait for a login request to complete before returning to the application
+* **callback?**: The function called when `.connect` has finished connecting. If no callback function is given, `.connect` will return a native JavaScript `Promise`. Callback signature is:
     * error: The error that occured in execution, or `null` if no error
     * connection: The Connection object if a successful connection was made
 
@@ -211,20 +246,25 @@ Once a Connection has been created with `odbc.connect`, you can use the followin
 
 ---
 
-### `.query(sql, parameters?, callback?)`
+### `.query(sql, parameters?, options?, callback?)`
 
 Run a query on the database. Can be passed an SQL string with parameter markers `?` and an array of parameters to bind to those markers. Returns a [result array](#result-array).
 
 #### Parameters:
 * **sql**: The SQL string to execute
 * **parameters?**: An array of parameters to be bound the parameter markers (`?`)
-* **{OPTIONAL} callback**: The function called when `.query` has finished execution. If no callback function is given, `.query` will return a native JavaScript `Promise`. Callback signature is:
+* **options?**: An object containing query options that affect query behavior. Valid properties include:
+    * `cursor`: A boolean value indicating whether or not to return a cursor instead of results immediately. Can also be a string naming the cursor, which will assume that a cursor will be returned.
+    * `fetchSize`: Used with a cursor, sets the number of rows that are returned on a call to `fetch` on the Cursor.
+    * `timeout`: The amount of time (in seconds) that the query will attempt to execute before returning to the application.
+    * `initialBufferSize`: Sets the initial buffer size (in bytes) for storing data from SQL_LONG* data fields. Useful for avoiding resizes if buffer size is known before the call.
+* **callback?**: The function called when `.query` has finished execution. If no callback function is given, `.query` will return a native JavaScript `Promise`. Callback signature is:
     * error: The error that occured in execution, or `null` if no error
     * result: The result object from execution
 
 ```JavaScript
 const odbc = require('odbc');
-const connection = odbc.connect(connectionString (error, connection) => {
+const connection = odbc.connect(connectionString, (error, connection) => {
     connection.query('SELECT * FROM QIWS.QCUSTCDT', (error, result) => {
         if (error) { console.error(error) }
         console.log(result);
@@ -242,8 +282,8 @@ Calls a database procedure, returning the results in a [result array](#result-ar
 * **catalog**: The name of the catalog where the procedure exists, or null to use the default catalog
 * **schema**: The name of the schema where the procedure exists, or null to use a default schema
 * **name**: The name of the procedure in the database
-* **{OPTIONAL} parameters**: An array of parameters to pass to the procedure. For input and input/output parameters, the JavaScript value passed in is expected to be of a type translatable to the SQL type the procedure expects. For output parameters, any JavaScript value can be passed in, and will be overwritten by the function. The number of parameters passed in must match the number of parameters expected by the procedure.
-* **{OPTIONAL} callback**: The function called when `.callProcedure` has finished execution. If no callback function is given, `.callProcedure` will return a native JavaScript `Promise`. Callback signature is:
+* **parameters?**: An array of parameters to pass to the procedure. For input and input/output parameters, the JavaScript value passed in is expected to be of a type translatable to the SQL type the procedure expects. For output parameters, any JavaScript value can be passed in, and will be overwritten by the function. The number of parameters passed in must match the number of parameters expected by the procedure.
+* **callback?**: The function called when `.callProcedure` has finished execution. If no callback function is given, `.callProcedure` will return a native JavaScript `Promise`. Callback signature is:
     * error: The error that occured in execution, or `null` if no error
     * result: The result object from execution
 
@@ -286,7 +326,7 @@ odbc.connect(`${process.env.CONNECTION_STRING}`, (error, connection) => {
 Returns a [Statement](#Statement) object from the connection.
 
 #### Parameters:
-* **{OPTIONAL} callback**: The function called when `.createStatement` has finished execution. If no callback function is given, `.createStatement` will return a native JavaScript `Promise`. Callback signature is:
+* **callback?**: The function called when `.createStatement` has finished execution. If no callback function is given, `.createStatement` will return a native JavaScript `Promise`. Callback signature is:
     * error: The error that occured in execution, or `null` if no error
     * statement: The newly created Statement object
 
@@ -332,7 +372,7 @@ Returns information about the table specified in the parameters by calling the O
 * **schema**: The name of the schema, or null if not specified
 * **table**: The name of the table, or null if not specified
 * **type**: The type of table that you want information about, or null if not specified
-* **{OPTIONAL} callback**: The function called when `.tables` has finished execution. If no callback function is given, `.tables` will return a native JavaScript `Promise`. Callback signature is:
+* **callback?**: The function called when `.tables` has finished execution. If no callback function is given, `.tables` will return a native JavaScript `Promise`. Callback signature is:
     * error: The error that occured in execution, or `null` if no error
     * result: The result object from execution
 
@@ -379,7 +419,7 @@ Returns information about the columns specified in the parameters by calling the
 * **schema**: The name of the schema, or null if not specified
 * **table**: The name of the table, or null if not specified
 * **column**: The name of the column that you want information about, or null if not specified
-* **{OPTIONAL} callback**: The function called when `.columns` has finished execution. If no callback function is given, `.columns` will return a native JavaScript `Promise`. Callback signature is:
+* **callback?**: The function called when `.columns` has finished execution. If no callback function is given, `.columns` will return a native JavaScript `Promise`. Callback signature is:
     * error: The error that occured in execution, or `null` if no error
     * result: The result object from execution
 
@@ -427,7 +467,7 @@ Sets the transaction isolation level for the connection, which determines what d
     * `odbc.SQL_TXN_READ_COMMITTED`
     * `odbc.SQL_TXN_REPEATABLE_READ`
     * `odbc.SQL_TXN_SERIALIZABLE`
-* **{OPTIONAL} callback**: The function called when `.setIsolationLevel` has finished execution. If no callback function is given, `.setIsolationLevel` will return a native JavaScript `Promise`. Callback signature is:
+* **callback?**: The function called when `.setIsolationLevel` has finished execution. If no callback function is given, `.setIsolationLevel` will return a native JavaScript `Promise`. Callback signature is:
     * error: The error that occured in execution, or `null` if no error
 
 #### Examples:
@@ -467,7 +507,7 @@ odbc.connect(`${process.env.CONNECTION_STRING}`, (error, connection) => {
 Begins a transaction on the connection. The transaction can be committed by calling `.commit` or rolled back by calling `.rollback`. **If a connection is closed with an open transaction, it will be rolled back.** Connection isolation level will affect the data that other transactions can view mid transaction.
 
 #### Parameters:
-* **{OPTIONAL} callback**: The function called when `.beginTransaction` has finished execution. If no callback function is given, `.beginTransaction` will return a native JavaScript `Promise`. Callback signature is:
+* **callback?**: The function called when `.beginTransaction` has finished execution. If no callback function is given, `.beginTransaction` will return a native JavaScript `Promise`. Callback signature is:
     * error: The error that occured in execution, or `null` if no error
 
 #### Examples:
@@ -507,7 +547,7 @@ odbc.connect(`${process.env.CONNECTION_STRING}`, (error, connection) => {
 Commits an open transaction. If called on a connection that doesn't have an open transaction, will no-op.
 
 #### Parameters:
-* **{OPTIONAL} callback**: The function called when `.commit` has finished execution. If no callback function is given, `.commit` will return a native JavaScript `Promise`. Callback signature is:
+* **callback?**: The function called when `.commit` has finished execution. If no callback function is given, `.commit` will return a native JavaScript `Promise`. Callback signature is:
     * error: The error that occured in execution, or `null` if no error
 
 #### Examples:
@@ -555,7 +595,7 @@ odbc.connect(`${process.env.CONNECTION_STRING}`, (error, connection) => {
 Rolls back an open transaction. If called on a connection that doesn't have an open transaction, will no-op.
 
 #### Parameters:
-* **{OPTIONAL} callback**: The function called when `.rollback` has finished execution. If no callback function is given, `.rollback` will return a native JavaScript `Promise`. Callback signature is:
+* **callback?**: The function called when `.rollback` has finished execution. If no callback function is given, `.rollback` will return a native JavaScript `Promise`. Callback signature is:
     * error: The error that occured in execution, or `null` if no error
 
 #### Examples:
@@ -602,7 +642,7 @@ odbc.connect(`${process.env.CONNECTION_STRING}`, (error, connection) => {
 Closes and open connection. Any transactions on the connection that have not been ended will be rolledback.
 
 #### Parameters:
-* **{OPTIONAL} callback**: The function called when `.close` has finished clsoing the connection. If no callback function is given, `.close` will return a native JavaScript `Promise`. Callback signature is:
+* **callback?**: The function called when `.close` has finished clsoing the connection. If no callback function is given, `.close` will return a native JavaScript `Promise`. Callback signature is:
     * error: The error that occured in execution, or `null` if no error
 
 #### Examples:
@@ -651,13 +691,13 @@ Note that `odbc.pool` will return from callback or Promise as soon as it has cre
 #### Parameters:
 * **connectionString**: The connection string to connect to the database for all connections in the pool, usually by naming a DSN. Can also be a configuration object with the following properties:
     * `connectionString` **REQUIRED**: The connection string to connect to the database
-    * `connectionTimeout`: How long before an idle connection will close, in seconds
-    * `loginTimeout`: How long before the connection process will attempt to connect before timing out, in seconds.
+    * `connectionTimeout`: The number of seconds to wait for a request on the connection to complete before returning to the application
+    * `loginTimeout`:The number of seconds to wait for a login request to complete before returning to the application
     * `initialSize`: The initial number of Connections created in the Pool
-    * `incrementSzie`: How many additional Connections to create when all of the Pool's connections are taken
+    * `incrementSize`: How many additional Connections to create when all of the Pool's connections are taken
     * `maxSize`: The maximum number of open Connections the Pool will create
     * `shrink`: Whether or not the number of Connections should shrink to `initialSize` as they free up
-* **{OPTIONAL} callback**: The function called when `.connect` has finished connecting. If no callback function is given, `.connect` will return a native JavaScript `Promise`. Callback signature is:
+* **callback?**: The function called when `.connect` has finished connecting. If no callback function is given, `.connect` will return a native JavaScript `Promise`. Callback signature is:
     * error: The error that occured in execution, or `null` if no error
     * connection: The Connection object if a successful connection was made
 
@@ -691,7 +731,7 @@ const pool = odbc.pool('DSN=MyDSN', (error, pool) => {
 Returns a [Connection](#connection) object for you to use from the Pool. Doesn't actually open a connection, because they are already open in the pool when `.init` is called.
 
 #### Parameters:
-* **{OPTIONAL} callback**: The function called when `.connect` has finished execution. If no callback function is given, `.connect` will return a native JavaScript `Promise`. Callback signature is:
+* **callback?**: The function called when `.connect` has finished execution. If no callback function is given, `.connect` will return a native JavaScript `Promise`. Callback signature is:
     * error: The error that occured in execution, or `null` if no error
     * connection: The [Connection](#connection) retrieved from the Pool.
 
@@ -733,8 +773,13 @@ Utility function to execute a query on any open connection in the pool. Will get
 
 #### Parameters:
 * **sql**: An SQL string that will be executed. Can optionally be given parameter markers (`?`) and also given an array of values to bind to the parameters.
-* **{OPTIONAL} parameters**: An array of values to bind to the parameter markers, if there are any. The number of values in this array must match the number of parameter markers in the sql statement.
-* **{OPTIONAL} callback**: The function called when `.query` has finished execution. If no callback function is given, `.query` will return a native JavaScript `Promise`. Callback signature is:
+* **parameters?**: An array of values to bind to the parameter markers, if there are any. The number of values in this array must match the number of parameter markers in the sql statement.
+* **options?**: An object containing query options that affect query behavior. Valid properties include:
+    * `cursor`: A boolean value indicating whether or not to return a cursor instead of results immediately. Can also be a string naming the cursor, which will assume that a cursor will be returned.
+    * `fetchSize`: Used with a cursor, sets the number of rows that are returned on a call to `fetch` on the Cursor.
+    * `timeout`: The amount of time (in seconds) that the query will attempt to execute before returning to the application.
+    * `initialBufferSize`: Sets the initial buffer size (in bytes) for storing data from SQL_LONG* data fields. Useful for avoiding resizes if buffer size is known before the call.
+* **callback?**: The function called when `.query` has finished execution. If no callback function is given, `.query` will return a native JavaScript `Promise`. Callback signature is:
     * error: The error that occured in execution, or `null` if no error
     * result: The [result array](#result-array) returned from the executed statement
 
@@ -775,7 +820,7 @@ odbc.pool(`${process.env.CONNECTION_STRING}`, (error1, pool) => {
 Closes the entire pool of currently unused connections. Will not close connections that are checked-out, but will discard the connections when they are closed with Connection's `.close` function. After calling close, must create a new Pool sprin up new Connections.
 
 #### Parameters:
-* **{OPTIONAL} callback**: The function called when `.close` has finished execution. If no callback function is given, `.close` will return a native JavaScript `Promise`. Callback signature is:
+* **callback?**: The function called when `.close` has finished execution. If no callback function is given, `.close` will return a native JavaScript `Promise`. Callback signature is:
     * error: The error that occured in execution, or `null` if no error
 
 #### Examples:
@@ -827,7 +872,7 @@ Prepares an SQL statement, with or without parameters (?) to bind to.
 
 #### Parameters:
 * **sql**: An SQL string that is prepared and can be executed with the .`execute` function.
-* **{OPTIONAL} callback**: The function called when `.prepare` has finished execution. If no callback function is given, `.prepare` will return a native JavaScript `Promise`. Callback signature is:
+* **callback?**: The function called when `.prepare` has finished execution. If no callback function is given, `.prepare` will return a native JavaScript `Promise`. Callback signature is:
     * error: The error that occured in execution, or `null` if no error
 
 #### Examples:
@@ -872,7 +917,7 @@ Binds an array of values to the parameters on the prepared SQL statement. Cannot
 
 #### Parameters:
 * **sql**: An array of values to bind to the sql statement previously prepared. All parameters will be input parameters. The number of values passed in the array must match the number of parameters to bind to in the prepared statement.
-* **{OPTIONAL} callback**: The function called when `.bind` has finished execution. If no callback function is given, `.bind` will return a native JavaScript `Promise`. Callback signature is:
+* **callback?**: The function called when `.bind` has finished execution. If no callback function is given, `.bind` will return a native JavaScript `Promise`. Callback signature is:
     * error: The error that occured in execution, or `null` if no error
 
 #### Examples:
@@ -922,7 +967,7 @@ odbc.connect(`${process.env.CONNECTION_STRING}`, (error, connection) => {
 Executes the prepared and optionally bound SQL statement.
 
 #### Parameters:
-* **{OPTIONAL} callback**: The function called when `.execute` has finished execution. If no callback function is given, `.execute` will return a native JavaScript `Promise`. Callback signature is:
+* **callback?**: The function called when `.execute` has finished execution. If no callback function is given, `.execute` will return a native JavaScript `Promise`. Callback signature is:
     * error: The error that occured in execution, or `null` if no error
     * result: The [result array](#result-array) returned from the executed statement
 
@@ -978,7 +1023,7 @@ odbc.connect(`${process.env.CONNECTION_STRING}`, (error, connection) => {
 Closes the Statement, freeing the statement handle. Running functions on the statement after closing will result in an error.
 
 #### Parameters:
-* **{OPTIONAL} callback**: The function called when `.close` has finished execution. If no callback function is given, `.close` will return a native JavaScript `Promise`. Callback signature is:
+* **callback?**: The function called when `.close` has finished execution. If no callback function is given, `.close` will return a native JavaScript `Promise`. Callback signature is:
     * error: The error that occured in execution, or `null` if no error
 
 #### Examples:
@@ -1033,6 +1078,171 @@ odbc.connect(`${process.env.CONNECTION_STRING}`, (error, connection) => {
 ---
 ---
 
+## **Cursor**
+
+A Cursor object is created from a Connection when running a query, and cannot be created _ad hoc_ with a constructor.
+
+Cursors allow you to fetch piecemeal instead of retrieving all rows at once. The fetch size is set on the query options, and then a Cursor is returned from the query instead of a result set. `.fetch` is then called to retrieve the result set by the fetch size.
+
+---
+
+### `.fetch(callback?)`
+
+Asynchronously returns the next chunk of rows from the result set and returns them as a Result object.
+
+#### Parameters:
+* **callback?**: The function called when `.fetch` has finished retrieving the result rows. If no callback function is given, `.fetch` will return a native JavaScript `Promise` that resolve the result rows. Callback signature is:
+    * error: The error that occured in execution, or `null` if no error
+    * results: The [result array](#result-array) returned from the executed statement with at most `fetchSize`-number of rows.
+
+#### Examples:
+
+**Promises**
+
+```javascript
+const odbc = require('odbc');
+
+// can only use await keyword in an async function
+async function cursorExample() {
+    const connection = await odbc.connect(`${process.env.CONNECTION_STRING}`);
+    const cursor = await connection.query('SELECT * FROM MY_TABLE', { cursor: true, fetchSize: 3 });
+    const result = await cursor.fetch();
+    // Now have a results array of size 3 (or less) that we can use
+    await cursor.close();
+}
+
+cursorExample();
+```
+
+**Callbacks**
+
+```javascript
+const odbc = require('odbc');
+
+odbc.connect(`${process.env.CONNECTION_STRING}`, (error, connection) => {
+    connection.query('SELECT * FROM MY_TABLE', { cursor: true, fetchSize: 3 }, (error1, cursor) => {
+        if (error1) { return; } // handle
+        cursor.fetch((error2, results) => {
+            if (error2) { return; } // handle
+            // Now have a results array of size 3 (or less) that we can use
+            cursor.close((error3) => {
+                if (error3) { return; } // handle
+                // cursor now closed, now do more work
+            })
+        });
+    });
+});
+```
+
+---
+
+### `.noData()`
+
+Returns whether the cursor is has reached the end of the result set. Fetch must be called at least once before noData can return `true`. Used for determining if there are no more results to retrieve from the cursor.
+
+#### Parameters:
+None
+
+#### Examples:
+
+**Promises**
+
+```javascript
+const odbc = require('odbc');
+
+// can only use await keyword in an async function
+async function cursorExample() {
+    const connection = await odbc.connect(`${process.env.CONNECTION_STRING}`);
+    const cursor = await connection.query('SELECT * FROM MY_TABLE', { cursor: true, fetchSize: 3 });
+    // As long as noData() returns false, keep calling fetch
+    while (!cursor.noData())
+    {
+        const result = await cursor.fetch();
+        // Now have a results array of size 3 (or less) that we can use
+    }
+    await cursor.close();
+}
+
+cursorExample();
+```
+
+**Callbacks**
+
+```javascript
+const odbc = require('odbc');
+
+odbc.connect(`${process.env.CONNECTION_STRING}`, (error, connection) => {
+    connection.query('SELECT * FROM MY_TABLE', { cursor: true, fetchSize: 3 }, (error1, cursor) => {
+        if (error1) { return; } // handle
+        cursor.fetch((error2, results) => {
+            if (error2) { return; } // handle
+            // Now have a results array of size 3 (or less) that we can use
+            if (!cursor.noData()) {
+                // Still more data to retrieve!
+            } else {
+                cursor.close((error3) => {
+                    if (error3) { return; } // handle
+                    // cursor now closed, now do more work
+                });
+            }
+        });
+    });
+});
+```
+
+---
+
+### `.close(callback?)`
+
+Closes the statement that the cursor was generated from, and by extension the cursor itself. Needs to be called when the cursor is no longer needed.
+
+#### Parameters:
+* **callback?**: The function called when `.close` has finished execution. If no callback function is given, `.close` will return a native JavaScript `Promise`. Callback signature is:
+    * error: The error that occured while closing the statement, or `null` if no error
+
+#### Examples:
+
+**Promises**
+
+```javascript
+const odbc = require('odbc');
+
+// can only use await keyword in an async function
+async function cursorExample() {
+    const connection = await odbc.connect(`${process.env.CONNECTION_STRING}`);
+    const cursor = await connection.query('SELECT * FROM MY_TABLE', { cursor: true, fetchSize: 3 });
+    const result = await cursor.fetch();
+    // Now have a results array of size 3 (or less) that we can use
+    await cursor.close();
+}
+
+cursorExample();
+```
+
+**Callbacks**
+
+```javascript
+const odbc = require('odbc');
+
+odbc.connect(`${process.env.CONNECTION_STRING}`, (error, connection) => {
+    connection.query('SELECT * FROM MY_TABLE', { cursor: true, fetchSize: 3 }, (error1, cursor) => {
+        if (error1) { return; } // handle
+        cursor.fetch((error2, results) => {
+            if (error2) { return; } // handle
+            // Now have a results array of size 3 (or less) that we can use
+            cursor.close((error3) => {
+                if (error3) { return; } // handle
+                // cursor now closed, now do more work
+            })
+        });
+    });
+});
+```
+
+---
+---
+
+
 ## Future improvements
 
 Development of `node-odbc` is an ongoing endeavor, and there are many planned improvements for the package. If you would like to see something, simply add it to the Issues and we will respond!
@@ -1052,7 +1262,7 @@ Development of `node-odbc` is an ongoing endeavor, and there are many planned im
 license
 -------
 
-* Copyright (c) 2019 IBM
+* Copyright (c) 2019, 2021 IBM
 * Copyright (c) 2013 Dan VerWeire <dverweire@gmail.com>
 * Copyright (c) 2010 Lee Smith <notwink@gmail.com>
 
