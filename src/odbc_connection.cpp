@@ -19,7 +19,7 @@
 #include "odbc.h"
 #include "odbc_connection.h"
 #include "odbc_statement.h"
-
+// minor change
 #define MAX_UTF8_BYTES 4
 
 // object keys for the result object
