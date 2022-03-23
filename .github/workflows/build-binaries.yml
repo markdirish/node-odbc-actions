@@ -1,6 +1,6 @@
 name: Build Binaries
 
-on: [push]
+on: pull_request
 
 jobs:
   build-windows:
@@ -9,7 +9,7 @@ jobs:
 
     strategy:
       matrix:
-        node-version: [12.x]
+        node-version: [12.x, 14.x, 16.x]
 
     steps:
     - uses: actions/checkout@v2
@@ -17,7 +17,9 @@ jobs:
       uses: actions/setup-node@v1
       with:
         node-version: ${{ matrix.node-version }}
-    - run: npm ci --production
+    - name: Upgrade NPM
+      run: npm install -g npm
+    - run: npm ci --production --build-from-source
 
   build-ubuntu:
 
@@ -25,7 +27,7 @@ jobs:
 
     strategy:
       matrix:
-        node-version: [12.x]
+        node-version: [12.x, 14.x, 16.x]
 
     steps:
     - uses: actions/checkout@v2
@@ -33,7 +35,9 @@ jobs:
       uses: actions/setup-node@v1
       with:
         node-version: ${{ matrix.node-version }}
-    - run: npm ci --production
+    - name: Upgrade NPM
+      run: npm install -g npm
+    - run: npm ci --production --build-from-source
 
   build-macos:
 
@@ -41,7 +45,7 @@ jobs:
 
     strategy:
       matrix:
-        node-version: [12.x]
+        node-version: [12.x, 14.x, 16.x]
 
     steps:
     - uses: actions/checkout@v2
@@ -49,4 +53,6 @@ jobs:
       uses: actions/setup-node@v1
       with:
         node-version: ${{ matrix.node-version }}
-    - run: npm ci --production
+    - name: Upgrade NPM
+      run: npm install -g npm
+    - run: npm ci --production --build-from-source
