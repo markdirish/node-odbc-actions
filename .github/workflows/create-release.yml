@@ -28,6 +28,31 @@ jobs:
         name: binaries
         path: build/stage/*.tar.gz
 
+  build-windows:
+
+    runs-on: macos-latest
+
+    strategy:
+      matrix:
+        node-version: [16.x]
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Use Node.js ${{ matrix.node-version }}
+      uses: actions/setup-node@v1
+      with:
+        node-version: ${{ matrix.node-version }}
+    - run: npm install -g node-gyp
+    - run: npm ci --production
+    - run: ./node_modules/.bin/node-pre-gyp --arch=arm build
+    - name: Package Binary
+      run: ./node_modules/.bin/node-pre-gyp package
+    - name: Upload Artifact
+      uses: actions/upload-artifact@v2
+      with:
+        name: mac-binaries
+        path: build/stage/*.tar.gz
+
   create-release:
 
     runs-on: ubuntu-latest
@@ -55,7 +80,7 @@ jobs:
 
     - uses: actions/download-artifact@v2
       with:
-        name: binaries
+        name: mac-binaries
 
     # Upload the various binaries
 
