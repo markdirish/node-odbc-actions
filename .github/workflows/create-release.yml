@@ -114,7 +114,7 @@ jobs:
 
     # Upload the various binaries
     - name: debug
-      run: ls -la
+      run: ls -la ./*-binaries/*.tar.gz
 
     # - name: Upload odbc-v${{ steps.package-version.outputs.current-version }} prebuild binaries
     #   uses: alexellis/upload-assets@0.2.2
