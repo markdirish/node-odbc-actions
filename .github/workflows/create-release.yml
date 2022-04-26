@@ -113,10 +113,12 @@ jobs:
     - uses: actions/download-artifact@v3
 
     # Upload the various binaries
+    - name: debug
+    - run: ls -la
 
-    - name: Upload odbc-v${{ steps.package-version.outputs.current-version }} prebuild binaries
-      uses: alexellis/upload-assets@0.2.2
-      env:
-        GITHUB_TOKEN: ${{ github.token }}
-      with:
-        asset_paths: '["./*/*.tar.gz"]'
+    # - name: Upload odbc-v${{ steps.package-version.outputs.current-version }} prebuild binaries
+    #   uses: alexellis/upload-assets@0.2.2
+    #   env:
+    #     GITHUB_TOKEN: ${{ github.token }}
+    #   with:
+    #     asset_paths: '["./*/*.tar.gz"]'
