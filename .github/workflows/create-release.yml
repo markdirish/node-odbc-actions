@@ -112,19 +112,131 @@ jobs:
     # Download all of the various binaries that were created
     - uses: actions/download-artifact@v3
 
-    # Upload the various binaries
-    - name: debug
-      run: ls -la ./*-binaries/*.tar.gz
+    # There is no 'upload-release-artifact' package that currently allows
+    # uploading to a draft release, other than the GitHub action that is no
+    # longer supported. However, that package allows only uploading one file
+    # at a time. Bit the bullet for now, contribute to one of the other projects
+    # later
 
-    - name: Release
-      uses: softprops/action-gh-release@v1
-      if: startsWith(github.ref, 'refs/tags/')
+    # Windows binaries
+    - name: Upload odbc-v${{ steps.package-version.outputs.current-version }}-win32-x64-napi-v3.tar.gz
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
-        files: ./*-binaries/*.tar.gz
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: ./windows-binaries/odbc-v${{ steps.package-version.outputs.current-version }}-win32-x64-napi-v3.tar.gz
+        asset_name: odbc-v${{ steps.package-version.outputs.current-version }}-win32-x64-napi-v3.tar.gz
+        asset_content_type: application/gzip
 
-    # - name: Upload odbc-v${{ steps.package-version.outputs.current-version }} prebuild binaries
-    #   uses: alexellis/upload-assets@0.2.2
-    #   env:
-    #     GITHUB_TOKEN: ${{ github.token }}
-    #   with:
-    #     asset_paths: '["./*-binaries/*.tar.gz"]'
+    - name: Upload odbc-v${{ steps.package-version.outputs.current-version }}-win32-x64-napi-v4.tar.gz
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: ./windows-binaries/odbc-v${{ steps.package-version.outputs.current-version }}-win32-x64-napi-v4.tar.gz
+        asset_name: odbc-v${{ steps.package-version.outputs.current-version }}-win32-x64-napi-v4.tar.gz
+        asset_content_type: application/gzip
+
+    - name: Upload odbc-v${{ steps.package-version.outputs.current-version }}-win32-x64-napi-v5.tar.gz
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: ./windows-binaries/odbc-v${{ steps.package-version.outputs.current-version }}-win32-x64-napi-v5.tar.gz
+        asset_name: odbc-v${{ steps.package-version.outputs.current-version }}-win32-x64-napi-v5.tar.gz
+        asset_content_type: application/gzip
+
+    - name: Upload odbc-v${{ steps.package-version.outputs.current-version }}-win32-x64-napi-v6.tar.gz
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: ./windows-binaries/odbc-v${{ steps.package-version.outputs.current-version }}-win32-x64-napi-v6.tar.gz
+        asset_name: odbc-v${{ steps.package-version.outputs.current-version }}-win32-x64-napi-v6.tar.gz
+        asset_content_type: application/gzip
+
+    # Macos binaries
+    - name: Upload odbc-v${{ steps.package-version.outputs.current-version }}-darwin-x64-napi-v3.tar.gz
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: ./macos-binaries/odbc-v${{ steps.package-version.outputs.current-version }}-darwin-x64-napi-v3.tar.gz
+        asset_name: odbc-v${{ steps.package-version.outputs.current-version }}-darwin-x64-napi-v3.tar.gz
+        asset_content_type: application/gzip
+
+    - name: Upload odbc-v${{ steps.package-version.outputs.current-version }}-darwin-x64-napi-v4.tar.gz
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: ./macos-binaries/odbc-v${{ steps.package-version.outputs.current-version }}-darwin-x64-napi-v4.tar.gz
+        asset_name: odbc-v${{ steps.package-version.outputs.current-version }}-darwin-x64-napi-v4.tar.gz
+        asset_content_type: application/gzip
+
+    - name: Upload odbc-v${{ steps.package-version.outputs.current-version }}-darwin-x64-napi-v5.tar.gz
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: ./macos-binaries/odbc-v${{ steps.package-version.outputs.current-version }}-darwin-x64-napi-v5.tar.gz
+        asset_name: odbc-v${{ steps.package-version.outputs.current-version }}-darwin-x64-napi-v5.tar.gz
+        asset_content_type: application/gzip
+
+    - name: Upload odbc-v${{ steps.package-version.outputs.current-version }}-darwin-x64-napi-v6.tar.gz
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: ./macos-binaries/odbc-v${{ steps.package-version.outputs.current-version }}-darwin-x64-napi-v6.tar.gz
+        asset_name: odbc-v${{ steps.package-version.outputs.current-version }}-darwin-x64-napi-v6.tar.gz
+        asset_content_type: application/gzip
+
+    # Linux binaries
+    - name: Upload odbc-v${{ steps.package-version.outputs.current-version }}-linux-x64-napi-v3.tar.gz
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: ./linux-binaries/odbc-v${{ steps.package-version.outputs.current-version }}-linux-x64-napi-v3.tar.gz
+        asset_name: odbc-v${{ steps.package-version.outputs.current-version }}-linux-x64-napi-v3.tar.gz
+        asset_content_type: application/gzip
+
+    - name: Upload odbc-v${{ steps.package-version.outputs.current-version }}-linux-x64-napi-v4.tar.gz
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: ./linux-binaries/odbc-v${{ steps.package-version.outputs.current-version }}-linux-x64-napi-v4.tar.gz
+        asset_name: odbc-v${{ steps.package-version.outputs.current-version }}-linux-x64-napi-v4.tar.gz
+        asset_content_type: application/gzip
+
+    - name: Upload odbc-v${{ steps.package-version.outputs.current-version }}-linux-x64-napi-v5.tar.gz
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: ./linux-binaries/odbc-v${{ steps.package-version.outputs.current-version }}-linux-x64-napi-v5.tar.gz
+        asset_name: odbc-v${{ steps.package-version.outputs.current-version }}-linux-x64-napi-v5.tar.gz
+        asset_content_type: application/gzip
+
+    - name: Upload odbc-v${{ steps.package-version.outputs.current-version }}-linux-x64-napi-v6.tar.gz
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: ./linux-binaries/odbc-v${{ steps.package-version.outputs.current-version }}-linux-x64-napi-v6.tar.gz
+        asset_name: odbc-v${{ steps.package-version.outputs.current-version }}-linux-x64-napi-v6.tar.gz
+        asset_content_type: application/gzip
